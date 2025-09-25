@@ -26,9 +26,6 @@
     .muted{color:var(--muted);font-size:12px}
     .tag{display:inline-block;padding:2px 8px;border:1px solid #263042;border-radius:999px;font-size:12px;margin-right:6px;color:var(--muted)}
     .small{font-size:12px}
-    .hr{height:1px;background:#232b36;margin:16px 0}
-    details>summary{cursor:pointer}
-    code{background:#0b0f16;border:1px solid #1f2630;padding:2px 6px;border-radius:6px}
   </style>
 </head>
 <body>
@@ -38,10 +35,10 @@
   </header>
 
   <div class="grid">
-    <!-- CARD 1: CALCULADORA -->
+    <!-- CARD 1: CALCULADORA (simplificada) -->
     <section class="card" id="calc-card">
       <h2 style="margin-top:0">Operaciones matemáticas</h2>
-      <p class="small muted">Ingresa dos valores, elige la operación y calcula. Incluye manejo de errores y opciones.</p>
+      <p class="small muted">Ingresa dos valores, elige la operación y calcula.</p>
 
       <div class="row">
         <div style="flex:1">
@@ -65,19 +62,6 @@
             <option value="pow">Potencia (A ^ B)</option>
           </select>
         </div>
-        <div style="flex:1">
-          <fieldset>
-            <legend>Formato (Option)</legend>
-            <label class="small"><input type="radio" name="fmt" value="normal" checked /> Normal</label>
-            <label class="small" style="margin-left:10px"><input type="radio" name="fmt" value="fixed2" /> 2 decimales</label>
-            <label class="small" style="margin-left:10px"><input type="radio" name="fmt" value="fixed4" /> 4 decimales</label>
-          </fieldset>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:6px">
-        <label class="small"><input id="allowNeg" type="checkbox" /> Permitir resultado negativo (CheckBox)</label>
-        <label class="small"><input id="showSteps" type="checkbox" /> Mostrar pasos</label>
       </div>
 
       <div class="row" style="margin-top:10px">
@@ -86,25 +70,9 @@
       </div>
 
       <div id="calcOut" class="result" aria-live="polite">Resultado aparecerá aquí…</div>
-
-      <details style="margin-top:10px">
-        <summary>Casos a probar (ítems de pruebas funcionales)</summary>
-        <ul class="small">
-          <li>Entrada vacía en A o B → debe mostrar mensaje de error.</li>
-          <li>Texto no numérico (p. ej., "abc") → debe mostrar mensaje de error.</li>
-          <li>División por 0 → debe bloquear y mostrar error.</li>
-          <li>Resultado negativo con <em>Permitir resultado negativo</em> desmarcado → debe advertir y no mostrar valor.</li>
-          <li>Formato de salida cambia según Option (normal, 2 y 4 decimales).</li>
-          <li>Activar <em>Mostrar pasos</em> debe detallar la operación realizada.</li>
-        </ul>
-      </details>
-
-      <div class="hr"></div>
-      <button class="btn" id="runCalcTests">▶ Ejecutar pruebas automáticas</button>
-      <div id="testLog" class="result small">Sin ejecutar…</div>
     </section>
 
-    <!-- CARD 2: FORMULARIO DE INGRESO DE DATOS -->
+    <!-- CARD 2: FORMULARIO DE INGRESO DE DATOS (mantiene Option y CheckBox) -->
     <section class="card" id="form-card">
       <h2 style="margin-top:0">Formulario de ingreso (5+ campos)</h2>
       <p class="small muted">Ejemplo de GUI con validación básica y resumen de envío.</p>
@@ -159,18 +127,6 @@
       </div>
 
       <div id="sendOut" class="result">Pendiente de envío…</div>
-
-      <details style="margin-top:10px">
-        <summary>Ítems de prueba recomendados</summary>
-        <ul class="small">
-          <li>Campos obligatorios vacíos → debe mostrar errores.</li>
-          <li>Correo con formato inválido → debe rechazarlo.</li>
-          <li>País no seleccionado → debe advertir.</li>
-          <li>Sin género elegido → debe advertir.</li>
-          <li>Términos no aceptados → debe bloquear el envío.</li>
-          <li>Seleccionar varios intereses → debe listarlos en el resumen.</li>
-        </ul>
-      </details>
     </section>
   </div>
 
@@ -179,10 +135,8 @@
   </footer>
 
   <script>
-    // -----------------------------
     // Utilidades
     const $ = (sel, ctx=document) => ctx.querySelector(sel);
-    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
 
     function parseNum(v){
       if(v === null || v === undefined) return NaN;
@@ -190,37 +144,26 @@
       return Number.isFinite(n) ? n : NaN;
     }
 
-    function formatByOption(value){
-      const fmt = $('input[name="fmt"]:checked').value;
-      if(fmt === 'fixed2') return Number(value).toFixed(2);
-      if(fmt === 'fixed4') return Number(value).toFixed(4);
-      return String(value);
-    }
-
     function setOut(node, html, ok=true){
       node.innerHTML = html;
       node.style.borderColor = ok ? '#2a3341' : '#3b2a2a';
     }
 
-    // -----------------------------
-    // Calculadora
+    // Calculadora (simplificada)
     $('#btnCalc').addEventListener('click', () => {
       const a = parseNum($('#n1').value);
       const b = parseNum($('#n2').value);
       const op = $('#op').value;
-      const allowNeg = $('#allowNeg').checked;
-      const showSteps = $('#showSteps').checked;
       const out = $('#calcOut');
 
       if(!Number.isFinite(a) || !Number.isFinite(b)){
         return setOut(out, '<span class="bad">Error:</span> ingresa números válidos en A y B.', false);
       }
-
       if(op === 'div' && b === 0){
         return setOut(out, '<span class="bad">Error:</span> división por cero no permitida.', false);
       }
 
-      let raw, symbol, step;
+      let raw, symbol;
       switch(op){
         case 'sum': raw = a + b; symbol = '+'; break;
         case 'sub': raw = a - b; symbol = '−'; break;
@@ -229,65 +172,28 @@
         case 'pow': raw = Math.pow(a,b); symbol = '^'; break;
       }
 
-      if(!allowNeg && raw < 0){
-        return setOut(out, '<span class="bad">Advertencia:</span> el resultado es negativo y la opción para permitirlo está desactivada.', false);
-      }
-
-      const formatted = formatByOption(raw);
-      step = showSteps ? `<div class="muted">Paso: ${a} ${symbol} ${b} = <code>${raw}</code></div>` : '';
-      setOut(out, `<b>Resultado:</b> ${formatted} ${step}`);
+      setOut(out, `<b>Resultado:</b> ${raw}`);
     });
 
     $('#btnClear').addEventListener('click', () => {
       $('#n1').value = '';
       $('#n2').value = '';
       $('#op').value = 'sum';
-      $('input[name="fmt"][value="normal"]').checked = true;
-      $('#allowNeg').checked = false;
-      $('#showSteps').checked = false;
       setOut($('#calcOut'), 'Resultado aparecerá aquí…');
     });
 
-    // Pequeño runner de pruebas para la calculadora
-    function assertEq(name, actual, expected){
-      const ok = Object.is(actual, expected);
-      return {name, ok, actual, expected};
-    }
+    // Formulario
+    function validateEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-    function runCalcTests(){
-      const tests = [];
-      tests.push(assertEq('Suma 2+3', (2+3), 5));
-      tests.push(assertEq('Resta 10-7', (10-7), 3));
-      tests.push(assertEq('Mul 4*5', (4*5), 20));
-      tests.push(assertEq('Div 8/2', (8/2), 4));
-      tests.push(assertEq('Pow 2^3', Math.pow(2,3), 8));
-      // 6) división por cero (JS daría Infinity; la UI lo bloquea)
-      tests.push({name:'Div por 0 protegido', ok: !Number.isFinite(8/0)});
-
-      const passed = tests.filter(t=>t.ok).length;
-      const total = tests.length;
-
-      const list = tests.map(t => `<li>${t.ok? '✅':'❌'} ${t.name} ${t.ok? '':'<span class="muted">(actual: '+t.actual+'; esperado: '+t.expected+')</span>'}</li>`).join('');
-      document.querySelector('#testLog').innerHTML = `<b>Resumen:</b> ${passed}/${total} pruebas OK<ul>${list}</ul>`;
-    }
-
-    document.querySelector('#runCalcTests').addEventListener('click', runCalcTests);
-
-    // -----------------------------
-    // Formulario de ingreso
-    function validateEmail(v){
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    }
-
-    document.querySelector('#btnSend').addEventListener('click', () => {
-      const fname = document.querySelector('#fname').value.trim();
-      const lname = document.querySelector('#lname').value.trim();
-      const email = document.querySelector('#email').value.trim();
-      const country = document.querySelector('#country').value;
+    $('#btnSend').addEventListener('click', () => {
+      const fname = $('#fname').value.trim();
+      const lname = $('#lname').value.trim();
+      const email = $('#email').value.trim();
+      const country = $('#country').value;
       const gender = document.querySelector('input[name="gender"]:checked')?.value;
       const interests = Array.from(document.querySelectorAll('.interest:checked')).map(x=>x.value);
       const terms = document.querySelector('#terms').checked;
-      const out = document.querySelector('#sendOut');
+      const out = $('#sendOut');
 
       const errors = [];
       if(!fname) errors.push('Nombre requerido');
@@ -309,17 +215,16 @@
         genero: gender,
         intereses: interests.length? interests.join(', ') : 'Ninguno'
       };
-
       setOut(out, `<b>Envío correcto</b> ✅<pre>${JSON.stringify(summary, null, 2)}</pre>`);
     });
 
-    document.querySelector('#btnReset').addEventListener('click', () => {
-      ['fname','lname','email'].forEach(id=>document.querySelector('#'+id).value='');
-      document.querySelector('#country').value='';
+    $('#btnReset').addEventListener('click', () => {
+      ['fname','lname','email'].forEach(id=>$('#'+id).value='');
+      $('#country').value='';
       Array.from(document.querySelectorAll('input[name="gender"]')).forEach(r=>r.checked=false);
       Array.from(document.querySelectorAll('.interest')).forEach(c=>c.checked=false);
       document.querySelector('#terms').checked=false;
-      setOut(document.querySelector('#sendOut'), 'Pendiente de envío…');
+      setOut($('#sendOut'), 'Pendiente de envío…');
     });
   </script>
 </body>
