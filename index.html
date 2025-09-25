@@ -163,13 +163,13 @@
         return setOut(out, '<span class="bad">Error:</span> división por cero no permitida.', false);
       }
 
-      let raw, symbol;
+      let raw;
       switch(op){
-        case 'sum': raw = a + b; symbol = '+'; break;
-        case 'sub': raw = a - b; symbol = '−'; break;
-        case 'mul': raw = a * b; symbol = '×'; break;
-        case 'div': raw = a / b; symbol = '÷'; break;
-        case 'pow': raw = Math.pow(a,b); symbol = '^'; break;
+        case 'sum': raw = a + b; break;
+        case 'sub': raw = a - b; break;
+        case 'mul': raw = a * b; break;
+        case 'div': raw = a / b; break;
+        case 'pow': raw = Math.pow(a,b); break;
       }
 
       setOut(out, `<b>Resultado:</b> ${raw}`);
@@ -183,7 +183,12 @@
     });
 
     // Formulario
-    function validateEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+    function validateEmail(v){
+      const at = v.indexOf('@');
+      if(at <= 0) return false;
+      const host = v.slice(at+1);
+      return host.includes('.') && !host.startsWith('.') && !host.endsWith('.');
+    }
 
     $('#btnSend').addEventListener('click', () => {
       const fname = $('#fname').value.trim();
