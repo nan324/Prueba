@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trabajo en equipos – GUI con pruebas</title>
+  <style>
+    :root { --bg:#0e1117; --card:#161b22; --ink:#e6edf3; --muted:#9da7b3; --accent:#3b82f6; --ok:#10b981; --bad:#ef4444; }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Calibri,"Helvetica Neue",Arial}
+    body{margin:0;background:var(--bg);color:var(--ink);padding:24px}
+    h1{font-size:22px;margin:0 0 8px}
+    p{color:var(--muted)}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+    .card{background:var(--card);border:1px solid #1f2630;border-radius:16px;padding:18px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    label{font-weight:600}
+    input[type="text"],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #263042;background:#0b0f16;color:var(--ink)}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid #263042;background:#0b0f16;color:var(--ink);cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:transparent;color:white}
+    .btn.ghost{background:transparent}
+    .result{margin-top:12px;padding:10px 12px;border-radius:10px;background:#0b1016;border:1px dashed #2a3341}
+    .ok{color:var(--ok)}
+    .bad{color:var(--bad)}
+    fieldset{border:1px solid #263042;border-radius:12px;padding:12px}
+    legend{padding:0 6px;color:var(--muted)}
+    .muted{color:var(--muted);font-size:12px}
+    .tag{display:inline-block;padding:2px 8px;border:1px solid #263042;border-radius:999px;font-size:12px;margin-right:6px;color:var(--muted)}
+    .small{font-size:12px}
+    .hr{height:1px;background:#232b36;margin:16px 0}
+    details>summary{cursor:pointer}
+    code{background:#0b0f16;border:1px solid #1f2630;padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <header style="margin-bottom:16px">
+    <h1>Interfaz GUI + Pruebas funcionales</h1>
+    <p>Componentes usados: <span class="tag">TextBox</span> <span class="tag">ComboBox</span> <span class="tag">Button</span> <span class="tag">CheckBox</span> <span class="tag">Option</span></p>
+  </header>
+
+  <div class="grid">
+    <!-- CARD 1: CALCULADORA -->
+    <section class="card" id="calc-card">
+      <h2 style="margin-top:0">Operaciones matemáticas</h2>
+      <p class="small muted">Ingresa dos valores, elige la operación y calcula. Incluye manejo de errores y opciones.</p>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="n1">Número A</label>
+          <input id="n1" type="text" placeholder="ej. 12.5" />
+        </div>
+        <div style="flex:1">
+          <label for="n2">Número B</label>
+          <input id="n2" type="text" placeholder="ej. 3" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div style="flex:1">
+          <label for="op">Operación</label>
+          <select id="op">
+            <option value="sum">Suma (A + B)</option>
+            <option value="sub">Resta (A − B)</option>
+            <option value="mul">Multiplicar (A × B)</option>
+            <option value="div">Dividir (A ÷ B)</option>
+            <option value="pow">Potencia (A ^ B)</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <fieldset>
+            <legend>Formato (Option)</legend>
+            <label class="small"><input type="radio" name="fmt" value="normal" checked /> Normal</label>
+            <label class="small" style="margin-left:10px"><input type="radio" name="fmt" value="fixed2" /> 2 decimales</label>
+            <label class="small" style="margin-left:10px"><input type="radio" name="fmt" value="fixed4" /> 4 decimales</label>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <label class="small"><input id="allowNeg" type="checkbox" /> Permitir resultado negativo (CheckBox)</label>
+        <label class="small"><input id="showSteps" type="checkbox" /> Mostrar pasos</label>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="btnCalc">Calcular</button>
+        <button class="btn ghost" id="btnClear">Limpiar</button>
+      </div>
+
+      <div id="calcOut" class="result" aria-live="polite">Resultado aparecerá aquí…</div>
+
+      <details style="margin-top:10px">
+        <summary>Casos a probar (ítems de pruebas funcionales)</summary>
+        <ul class="small">
+          <li>Entrada vacía en A o B → debe mostrar mensaje de error.</li>
+          <li>Texto no numérico (p. ej., "abc") → debe mostrar mensaje de error.</li>
+          <li>División por 0 → debe bloquear y mostrar error.</li>
+          <li>Resultado negativo con <em>Permitir resultado negativo</em> desmarcado → debe advertir y no mostrar valor.</li>
+          <li>Formato de salida cambia según Option (normal, 2 y 4 decimales).</li>
+          <li>Activar <em>Mostrar pasos</em> debe detallar la operación realizada.</li>
+        </ul>
+      </details>
+
+      <div class="hr"></div>
+      <button class="btn" id="runCalcTests">▶ Ejecutar pruebas automáticas</button>
+      <div id="testLog" class="result small">Sin ejecutar…</div>
+    </section>
+
+    <!-- CARD 2: FORMULARIO DE INGRESO DE DATOS -->
+    <section class="card" id="form-card">
+      <h2 style="margin-top:0">Formulario de ingreso (5+ campos)</h2>
+      <p class="small muted">Ejemplo de GUI con validación básica y resumen de envío.</p>
+
+      <div class="row">
+        <div style="flex:1">
+          <label for="fname">Nombre</label>
+          <input id="fname" type="text" placeholder="María" />
+        </div>
+        <div style="flex:1">
+          <label for="lname">Apellido</label>
+          <input id="lname" type="text" placeholder="García" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <div style="flex:1">
+          <label for="email">Correo</label>
+          <input id="email" type="text" placeholder="maria@example.com" />
+        </div>
+        <div style="flex:1">
+          <label for="country">País (ComboBox)</label>
+          <select id="country">
+            <option value="">Selecciona…</option>
+            <option>Perú</option>
+            <option>Chile</option>
+            <option>Argentina</option>
+            <option>Colombia</option>
+          </select>
+        </div>
+      </div>
+
+      <fieldset style="margin-top:10px">
+        <legend>Género (Option)</legend>
+        <label class="small"><input type="radio" name="gender" value="Femenino" /> Femenino</label>
+        <label class="small" style="margin-left:10px"><input type="radio" name="gender" value="Masculino" /> Masculino</label>
+        <label class="small" style="margin-left:10px"><input type="radio" name="gender" value="Otro" /> Otro</label>
+      </fieldset>
+
+      <fieldset style="margin-top:10px">
+        <legend>Intereses (CheckBox)</legend>
+        <label class="small"><input type="checkbox" value="IA" class="interest" /> IA</label>
+        <label class="small" style="margin-left:10px"><input type="checkbox" value="Web" class="interest" /> Web</label>
+        <label class="small" style="margin-left:10px"><input type="checkbox" value="Datos" class="interest" /> Datos</label>
+      </fieldset>
+
+      <label class="small" style="display:block;margin-top:10px"><input id="terms" type="checkbox" /> Acepto los términos</label>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="btnSend">Enviar</button>
+        <button class="btn ghost" id="btnReset">Reset</button>
+      </div>
+
+      <div id="sendOut" class="result">Pendiente de envío…</div>
+
+      <details style="margin-top:10px">
+        <summary>Ítems de prueba recomendados</summary>
+        <ul class="small">
+          <li>Campos obligatorios vacíos → debe mostrar errores.</li>
+          <li>Correo con formato inválido → debe rechazarlo.</li>
+          <li>País no seleccionado → debe advertir.</li>
+          <li>Sin género elegido → debe advertir.</li>
+          <li>Términos no aceptados → debe bloquear el envío.</li>
+          <li>Seleccionar varios intereses → debe listarlos en el resumen.</li>
+        </ul>
+      </details>
+    </section>
+  </div>
+
+  <footer class="small muted" style="margin-top:18px">
+    <p>Hecho para NetBeans o cualquier servidor estático. Archivo único HTML+JS+CSS.</p>
+  </footer>
+
+  <script>
+    // -----------------------------
+    // Utilidades
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+    function parseNum(v){
+      if(v === null || v === undefined) return NaN;
+      const n = Number(String(v).replace(/,/g,''));
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function formatByOption(value){
+      const fmt = $('input[name="fmt"]:checked').value;
+      if(fmt === 'fixed2') return Number(value).toFixed(2);
+      if(fmt === 'fixed4') return Number(value).toFixed(4);
+      return String(value);
+    }
+
+    function setOut(node, html, ok=true){
+      node.innerHTML = html;
+      node.style.borderColor = ok ? '#2a3341' : '#3b2a2a';
+    }
+
+    // -----------------------------
+    // Calculadora
+    $('#btnCalc').addEventListener('click', () => {
+      const a = parseNum($('#n1').value);
+      const b = parseNum($('#n2').value);
+      const op = $('#op').value;
+      const allowNeg = $('#allowNeg').checked;
+      const showSteps = $('#showSteps').checked;
+      const out = $('#calcOut');
+
+      if(!Number.isFinite(a) || !Number.isFinite(b)){
+        return setOut(out, '<span class="bad">Error:</span> ingresa números válidos en A y B.', false);
+      }
+
+      if(op === 'div' && b === 0){
+        return setOut(out, '<span class="bad">Error:</span> división por cero no permitida.', false);
+      }
+
+      let raw, symbol, step;
+      switch(op){
+        case 'sum': raw = a + b; symbol = '+'; break;
+        case 'sub': raw = a - b; symbol = '−'; break;
+        case 'mul': raw = a * b; symbol = '×'; break;
+        case 'div': raw = a / b; symbol = '÷'; break;
+        case 'pow': raw = Math.pow(a,b); symbol = '^'; break;
+      }
+
+      if(!allowNeg && raw < 0){
+        return setOut(out, '<span class="bad">Advertencia:</span> el resultado es negativo y la opción para permitirlo está desactivada.', false);
+      }
+
+      const formatted = formatByOption(raw);
+      step = showSteps ? `<div class="muted">Paso: ${a} ${symbol} ${b} = <code>${raw}</code></div>` : '';
+      setOut(out, `<b>Resultado:</b> ${formatted} ${step}`);
+    });
+
+    $('#btnClear').addEventListener('click', () => {
+      $('#n1').value = '';
+      $('#n2').value = '';
+      $('#op').value = 'sum';
+      $('input[name="fmt"][value="normal"]').checked = true;
+      $('#allowNeg').checked = false;
+      $('#showSteps').checked = false;
+      setOut($('#calcOut'), 'Resultado aparecerá aquí…');
+    });
+
+    // Pequeño runner de pruebas para la calculadora
+    function assertEq(name, actual, expected){
+      const ok = Object.is(actual, expected);
+      return {name, ok, actual, expected};
+    }
+
+    function runCalcTests(){
+      const tests = [];
+      tests.push(assertEq('Suma 2+3', (2+3), 5));
+      tests.push(assertEq('Resta 10-7', (10-7), 3));
+      tests.push(assertEq('Mul 4*5', (4*5), 20));
+      tests.push(assertEq('Div 8/2', (8/2), 4));
+      tests.push(assertEq('Pow 2^3', Math.pow(2,3), 8));
+      // 6) división por cero (JS daría Infinity; la UI lo bloquea)
+      tests.push({name:'Div por 0 protegido', ok: !Number.isFinite(8/0)});
+
+      const passed = tests.filter(t=>t.ok).length;
+      const total = tests.length;
+
+      const list = tests.map(t => `<li>${t.ok? '✅':'❌'} ${t.name} ${t.ok? '':'<span class="muted">(actual: '+t.actual+'; esperado: '+t.expected+')</span>'}</li>`).join('');
+      document.querySelector('#testLog').innerHTML = `<b>Resumen:</b> ${passed}/${total} pruebas OK<ul>${list}</ul>`;
+    }
+
+    document.querySelector('#runCalcTests').addEventListener('click', runCalcTests);
+
+    // -----------------------------
+    // Formulario de ingreso
+    function validateEmail(v){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    document.querySelector('#btnSend').addEventListener('click', () => {
+      const fname = document.querySelector('#fname').value.trim();
+      const lname = document.querySelector('#lname').value.trim();
+      const email = document.querySelector('#email').value.trim();
+      const country = document.querySelector('#country').value;
+      const gender = document.querySelector('input[name="gender"]:checked')?.value;
+      const interests = Array.from(document.querySelectorAll('.interest:checked')).map(x=>x.value);
+      const terms = document.querySelector('#terms').checked;
+      const out = document.querySelector('#sendOut');
+
+      const errors = [];
+      if(!fname) errors.push('Nombre requerido');
+      if(!lname) errors.push('Apellido requerido');
+      if(!email || !validateEmail(email)) errors.push('Correo inválido');
+      if(!country) errors.push('Selecciona país');
+      if(!gender) errors.push('Selecciona género');
+      if(!terms) errors.push('Debes aceptar los términos');
+
+      if(errors.length){
+        setOut(out, '<span class="bad">Errores:</span> '+ errors.join(' · '), false);
+        return;
+      }
+
+      const summary = {
+        nombre: fname + ' ' + lname,
+        correo: email,
+        pais: country,
+        genero: gender,
+        intereses: interests.length? interests.join(', ') : 'Ninguno'
+      };
+
+      setOut(out, `<b>Envío correcto</b> ✅<pre>${JSON.stringify(summary, null, 2)}</pre>`);
+    });
+
+    document.querySelector('#btnReset').addEventListener('click', () => {
+      ['fname','lname','email'].forEach(id=>document.querySelector('#'+id).value='');
+      document.querySelector('#country').value='';
+      Array.from(document.querySelectorAll('input[name="gender"]')).forEach(r=>r.checked=false);
+      Array.from(document.querySelectorAll('.interest')).forEach(c=>c.checked=false);
+      document.querySelector('#terms').checked=false;
+      setOut(document.querySelector('#sendOut'), 'Pendiente de envío…');
+    });
+  </script>
+</body>
+</html>
